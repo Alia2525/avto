@@ -1,168 +1,157 @@
 # Бортжурнал автомобіліста (REST + GraphQL + WebSockets)
 
-Комплексний клієнт‑серверний демо‑застосунок на **Django**, який демонструє роботу **REST API (DRF)**, **GraphQL (Strawberry)** та **WebSockets (Django Channels)**.
+Комплексний клієнт-серверний демо-застосунок на **Django**, який демонструє роботу **REST API (Django REST Framework)**, **GraphQL (Strawberry)** та **WebSockets (Django Channels)**.
 
-## Функції
+---
 
-- **Auth**
-  - Реєстрація: `POST /api/auth/register/`
-  - Логін (JWT): `POST /api/auth/token/`
-  - Профіль: `GET /api/auth/me/`
-  - Забули пароль: `POST /api/auth/password/forgot/` (у dev payload друкується в консоль бекенду)
-  - Reset підтвердження: `POST /api/auth/password/reset/`
-- **REST**
-  - CRUD для авто: VIN, марка, модель
-  - Фіксація базових витрат: заправки (дата, пробіг, літри, сума)
-  - CRUD для замовлень запчастин: `SparePartOrder` (назва, артикул, к-сть, статус, ціна)
-- **GraphQL**
-  - Гнучкий запит `maintenanceHistory(vin: String!)` — історія ТО + плани ТО з привʼязкою до пробігу
-- **WebSockets**
-  - Push‑нагадування `/ws/reminders/` — “due soon / overdue” за планами ТО (після нової заправки/ТО оновлюється автоматично)
+## 🔗 Демо-посилання
 
-## Запуск (Windows / PowerShell)
 
-### Backend
+Адмін-панель:
+https://avto-8w3n.onrender.com/admin/
+Логін: admin
+Пароль: AvtoAdmin_2026!StrongPass9
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\pip install -r requirements.txt
-.\.venv\Scripts\python backend\manage.py migrate
-.\.venv\Scripts\python backend\manage.py createsuperuser
-.\.venv\Scripts\python backend\manage.py runserver 0.0.0.0:8000
-```
+### Frontend (Render)
 
-- Адмінка: `http://localhost:8000/admin/`
-- Auth: `http://localhost:8000/api/auth/...`
-- REST: `http://localhost:8000/api/cars/`, `http://localhost:8000/api/fuel-fillups/`, `http://localhost:8000/api/spare-part-orders/`
-- GraphQL: `http://localhost:8000/graphql/`
-- WS: `ws://localhost:8000/ws/reminders/`
+https://avto-1-1p0q.onrender.com
 
-### Frontend (простий статичний демо‑клієнт)
+---
 
-Відкрий `frontend/index.html` у браузері (або запусти будь‑який static server у папці `frontend/`).
+## ⚙️ Функціонал
 
-## Дані для нагадувань
+### 🔐 Auth
 
-Нагадування зʼявляються, якщо:
+* Реєстрація користувача
+* Логін (JWT)
+* Отримання профілю користувача
+* Відновлення пароля (dev-режим)
 
-- є **заправка** (вона дає “поточний пробіг”)
-- є **план ТО** (`MaintenancePlan`) або запис ТО (`MaintenanceRecord`) — після збереження запису ТО план створюється/оновлюється автоматично
+---
 
-Планові інтервали за замовчуванням: `10_000` км, “due soon” = `<= 500` км до наступного ТО.
+### 🚗 REST API
 
-## Docker / деплой (VPS)
+* CRUD для автомобілів (VIN, марка, модель)
+* Заправки (дата, пробіг, літри, сума)
+* Замовлення запчастин (`SparePartOrder`):
 
-Локально:
+  * назва
+  * артикул
+  * кількість
+  * статус
+  * ціна
 
-```powershell
-docker compose up --build
-```
+---
 
-Мінімальні env (для docker-compose або VPS):
+### 📊 GraphQL
 
-- `DJANGO_SECRET_KEY`: обовʼязково в проді
-- `DJANGO_DEBUG=0`
-- `DJANGO_ALLOWED_HOSTS=your-domain.com,1.2.3.4`
-- `REDIS_URL=redis://redis:6379/0` (для WS у проді)
+* Запит:
 
-На VPS (Ubuntu) зазвичай достатньо:
+  * `maintenanceHistory(vin: String!)`
+* Повертає:
 
-- встановити Docker + Docker Compose
-- відкрити порт `8000` (або проксувати через Nginx)
-- задати `DJANGO_ALLOWED_HOSTS` під домен/IP
+  * історію ТО
+  * плани ТО
+  * прив’язку до пробігу
 
-### Приклад деплою на VPS (Ubuntu) з публічним посиланням
+---
 
-1) На VPS встанови Docker і Compose.
+### 🔔 WebSockets
 
-2) Склонуй проєкт:
+* Канал: `/ws/reminders/`
+* Реальний час:
 
-```bash
-git clone <your-repo>
-cd avto
-```
+  * нагадування про ТО
+  * “due soon / overdue”
+* Оновлення після додавання заправки або ТО
 
-3) В `docker-compose.yml` або через `.env` вистав:
+---
 
-- `DJANGO_SECRET_KEY` (випадковий довгий рядок)
-- `DJANGO_DEBUG=0`
-- `DJANGO_ALLOWED_HOSTS=<domain>,<server_ip>`
-- `REDIS_URL=redis://redis:6379/0`
+## 📡 API Endpoints
 
-4) Запусти:
+### Auth
 
-```bash
-docker compose up --build -d
-```
+* `POST /api/auth/register/`
+* `POST /api/auth/token/`
+* `GET /api/auth/me/`
+* `POST /api/auth/password/forgot/`
+* `POST /api/auth/password/reset/`
 
-5) Створи адміна в контейнері:
+### Cars
 
-```bash
-docker compose exec web python backend/manage.py createsuperuser
-```
+* `GET /api/cars/`
 
-6) Відкрий у браузері:
+### Fuel
 
-- `http://<server_ip>:8000/admin/`
-- `http://<server_ip>:8000/api/...`
-- `http://<server_ip>:8000/graphql/`
+* `GET /api/fuel-fillups/`
 
-> Для красивого домену + HTTPS зазвичай ставлять Nginx як reverse proxy (на 80/443) і проксють на `localhost:8000`.
+### Spare parts
 
-## Безкоштовний деплой (рекомендовано): Fly.io (backend) + GitHub Pages (frontend)
+* `GET /api/spare-part-orders/`
 
-### 1) Підготуй GitHub репозиторій
+### GraphQL
 
-- Встанови Git for Windows (щоб працювала команда `git`)
-- Створи репозиторій на GitHub і запуш проєкт
+* `/graphql/`
 
-### 2) Backend на Fly.io (Django + WebSockets)
+### WebSockets
 
-1) Зареєструйся на Fly.io і встанови CLI:
+* `ws:// / wss:// avto-8w3n.onrender.com/ws/reminders/`
 
-```powershell
-winget install -e --id FlyIO.Flyctl
-flyctl auth login
-```
+---
 
-2) У корені проєкту запусти:
+## 🧠 Бізнес-логіка нагадувань
 
-```powershell
-flyctl launch
-```
+Нагадування формуються якщо:
 
-- обери **region** (будь-який)
-- **не додавай Postgres** (нам він не потрібен)
+* є заправки (формують поточний пробіг)
+* є план технічного обслуговування
+* після кожного запису ТО план оновлюється автоматично
 
-3) Додай секрети (обовʼязково!):
+Стандартний інтервал ТО:
 
-```powershell
-flyctl secrets set DJANGO_SECRET_KEY="your-long-secret" DJANGO_DEBUG="0" DJANGO_ALLOWED_HOSTS="<your-app>.fly.dev"
-```
+* 10 000 км
+* “due soon” = ≤ 500 км до планового ТО
 
-4) Задеплой:
+---
 
-```powershell
-flyctl deploy
-```
+## 🚀 Деплой
 
-5) Після деплою відкрий:
+Проєкт повністю розгорнутий на **Render**:
 
-- `https://<your-app>.fly.dev/admin/`
-- `https://<your-app>.fly.dev/api/...`
-- `https://<your-app>.fly.dev/graphql/`
-- WS: `wss://<your-app>.fly.dev/ws/reminders/`
+* Backend: Django + DRF + GraphQL + Channels
+* Frontend: Static site (HTML/CSS/JS)
+* База даних: PostgreSQL (Render managed)
 
-> Примітка: без Redis WS працюватиме для 1 інстансу (достатньо для навчального демо). Якщо захочеш “як у проді” — додаси Redis і виставиш `REDIS_URL`.
+---
 
-### 3) Frontend на GitHub Pages (статичний)
+## 🔧 Frontend
 
-1) У `frontend/main.js` заміни `API_BASE` на URL твого бекенду (наприклад `https://<your-app>.fly.dev`)
-2) Створи в репозиторії папку `docs/` і скопіюй туди `frontend/index.html` та `frontend/main.js`
-3) У GitHub → **Settings → Pages**:
-   - Source: **Deploy from a branch**
-   - Branch: `main`
-   - Folder: `/docs`
-4) Отримаєш публічне посилання на фронтенд, який звертається до твого бекенду на Fly.io.
+Фронтенд — це простий SPA/статичний клієнт:
+
+* працює через fetch-запити до API
+* не потребує Node.js збірки
+* розгортається як Static Site
+
+---
+
+## 🧩 Архітектура
+
+* Backend: Django
+* API: Django REST Framework
+* GraphQL: Strawberry
+* Real-time: Django Channels (WebSockets)
+* Frontend: Vanilla JS (static)
+* Hosting: Render
+
+---
+
+## 📌 Примітка
+
+Проєкт створений як навчально-демонстраційний:
+
+* показує роботу трьох типів API
+* демонструє real-time оновлення
+* імітує систему бортжурналу автомобіля
+
 
 
