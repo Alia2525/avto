@@ -39,6 +39,18 @@ ALLOWED_HOSTS = [
     if h.strip()
 ]
 
+# Render (and similar platforms) sit behind an HTTPS proxy.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
+CSRF_TRUSTED_ORIGINS = [
+    o.strip()
+    for o in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+    if o.strip()
+]
+if not CSRF_TRUSTED_ORIGINS:
+    CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h not in {"localhost", "127.0.0.1"}]
+
 
 # Application definition
 
