@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Бортжурнал авто — demo</title>
+    <style>
+      :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+      body { margin: 0; background: #0b1220; color: #e6eefc; }
+      header { padding: 20px 24px; border-bottom: 1px solid #23304a; }
+      main { padding: 20px 24px; display: grid; grid-template-columns: 1fr; gap: 18px; max-width: 1100px; margin: 0 auto; }
+      .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+      .card { background: #0f1930; border: 1px solid #22304c; border-radius: 12px; padding: 14px; }
+      h2 { margin: 0 0 10px; font-size: 16px; }
+      label { display: block; font-size: 12px; opacity: 0.9; margin: 10px 0 6px; }
+      input, button, textarea { width: 100%; box-sizing: border-box; border-radius: 10px; border: 1px solid #2b3b5c; background: #0b1428; color: #e6eefc; padding: 10px; }
+      button { cursor: pointer; background: #1d4ed8; border-color: #1d4ed8; font-weight: 600; }
+      button.secondary { background: #0b1428; border-color: #2b3b5c; }
+      pre { margin: 10px 0 0; padding: 10px; background: #0b1428; border: 1px solid #2b3b5c; border-radius: 10px; overflow: auto; max-height: 260px; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .pill { display: inline-block; padding: 3px 8px; border-radius: 999px; font-size: 12px; background: #0b1428; border: 1px solid #2b3b5c; }
+      @media (max-width: 1000px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div style="display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;">
+        <div>
+          <div style="font-size:18px; font-weight:700;">Бортжурнал автомобіліста — demo</div>
+          <div style="opacity:.85; margin-top:4px;">
+            <span class="pill">REST</span>
+            <span class="pill">GraphQL</span>
+            <span class="pill">WebSockets</span>
+          </div>
+        </div>
+        <div style="opacity:.85; font-size:12px;">
+          Backend: <code>http://localhost:8000</code>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="grid">
+        <section class="card">
+          <h2>Реєстрація / логін</h2>
+          <label>Username</label>
+          <input id="authUsername" placeholder="user1" />
+          <label>Email</label>
+          <input id="authEmail" placeholder="user1@example.com" />
+          <label>Password</label>
+          <input id="authPassword" type="password" placeholder="********" />
+          <div class="row" style="margin-top:10px;">
+            <button id="btnRegister">Реєстрація</button>
+            <button class="secondary" id="btnLogin">Логін (JWT)</button>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <button class="secondary" id="btnMe">Хто я?</button>
+            <button class="secondary" id="btnLogout">Вийти</button>
+          </div>
+          <label style="margin-top:12px;">Забули пароль (надішле payload в консоль бекенду)</label>
+          <input id="forgotEmail" placeholder="user1@example.com" />
+          <button class="secondary" id="btnForgot">Надіслати reset</button>
+          <label style="margin-top:12px;">Reset confirm</label>
+          <div class="row">
+            <input id="resetUid" placeholder="uid" />
+            <input id="resetToken" placeholder="token" />
+          </div>
+          <input id="resetNewPassword" type="password" placeholder="new password" />
+          <button class="secondary" id="btnResetConfirm">Змінити пароль</button>
+          <pre id="authOut">{}</pre>
+        </section>
+        <section class="card">
+          <h2>REST — авто</h2>
+          <div class="row">
+            <div>
+              <label>VIN</label>
+              <input id="carVin" placeholder="WAUZZZ..." />
+            </div>
+            <div>
+              <label>Марка</label>
+              <input id="carMake" placeholder="Audi" />
+            </div>
+          </div>
+          <label>Модель (опц.)</label>
+          <input id="carModel" placeholder="A4" />
+          <div class="row" style="margin-top:10px;">
+            <button id="btnCreateCar">Додати авто</button>
+            <button class="secondary" id="btnListCars">Список авто</button>
+          </div>
+          <pre id="restCarsOut">{}</pre>
+        </section>
+
+        <section class="card">
+          <h2>REST — заправка (базові витрати)</h2>
+          <label>ID авто (car)</label>
+          <input id="fillCarId" placeholder="1" />
+          <div class="row">
+            <div>
+              <label>Дата (YYYY-MM-DD)</label>
+              <input id="fillDate" placeholder="2026-06-02" />
+            </div>
+            <div>
+              <label>Пробіг (км)</label>
+              <input id="fillKm" placeholder="123456" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Літри</label>
+              <input id="fillLiters" placeholder="45.3" />
+            </div>
+            <div>
+              <label>Сума</label>
+              <input id="fillCost" placeholder="2500.00" />
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px;">
+            <button id="btnCreateFill">Зберегти заправку</button>
+            <button class="secondary" id="btnListFill">Список заправок</button>
+          </div>
+          <pre id="restFillOut">{}</pre>
+        </section>
+
+        <section class="card">
+          <h2>GraphQL — історія ТО + пробіг</h2>
+          <label>VIN</label>
+          <input id="gqlVin" placeholder="WAUZZZ..." />
+          <label>Запит (можна редагувати)</label>
+          <textarea id="gqlQuery" rows="9"></textarea>
+          <div class="row" style="margin-top:10px;">
+            <button id="btnRunGql">Виконати</button>
+            <button class="secondary" id="btnResetGql">Reset</button>
+          </div>
+          <pre id="gqlOut">{}</pre>
+        </section>
+
+        <section class="card">
+          <h2>REST — замовлення запчастин</h2>
+          <label>ID авто (car)</label>
+          <input id="orderCarId" placeholder="1" />
+          <label>Назва запчастини</label>
+          <input id="orderPartName" placeholder="Oil filter" />
+          <div class="row">
+            <div>
+              <label>Артикул (опц.)</label>
+              <input id="orderPartNumber" placeholder="OC 123" />
+            </div>
+            <div>
+              <label>Кількість</label>
+              <input id="orderQty" placeholder="1" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Статус</label>
+              <input id="orderStatus" placeholder="draft / ordered / shipped / delivered" />
+            </div>
+            <div>
+              <label>Магазин (опц.)</label>
+              <input id="orderVendor" placeholder="Exist / Autodoc" />
+            </div>
+          </div>
+          <div class="row">
+            <div>
+              <label>Ціна (опц.)</label>
+              <input id="orderPrice" placeholder="500.00" />
+            </div>
+            <div>
+              <label>Дата замовлення (опц. ISO)</label>
+              <input id="orderOrderedAt" placeholder="2026-06-02T10:00:00Z" />
+            </div>
+          </div>
+          <label>Нотатки</label>
+          <input id="orderNotes" placeholder="delivery to Nova Poshta" />
+          <div class="row" style="margin-top:10px;">
+            <button id="btnCreateOrder">Створити</button>
+            <button class="secondary" id="btnListOrders">Список</button>
+          </div>
+          <pre id="ordersOut">{}</pre>
+        </section>
+      </div>
+
+      <section class="card">
+        <h2>WS — нагадування про ТО (push)</h2>
+        <div class="row">
+          <button id="btnWsConnect">Підключити WS</button>
+          <button class="secondary" id="btnWsDisconnect">Відключити</button>
+        </div>
+        <pre id="wsOut">{"status":"disconnected"}</pre>
+      </section>
+    </main>
+
+    <script src="./main.js"></script>
+  </body>
+</html>
+
