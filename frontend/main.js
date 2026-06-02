@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8000";
+const API_BASE = "https://avto-8w3n.onrender.com";
 
 function getToken() {
   return localStorage.getItem("access_token") || "";
