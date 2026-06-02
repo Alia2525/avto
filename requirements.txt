@@ -7,3 +7,4 @@ daphne>=4.1
 channels-redis>=4.2
 django-cors-headers>=4.7
 python-dotenv>=1.0
+whitenoise>=6.11
